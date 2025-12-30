@@ -1,0 +1,50 @@
+[project]
+name = "rqbit-client"
+version = "0.0.1"
+description = "Python client for rqbit bittorent web api"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.27.0",
+]
+classifiers = [
+    "Development Status :: 1 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+license = "MIT"
+license-files = ["LICENSE"]
+
+[project.urls]
+Repository = "https://github.com/kviktor/rqbit-client"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "respx>=0.22.0",
+    "ruff>=0.14.10",
+    "ty>=0.0.8",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.20,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
+
+[tool.ruff]
+line-length = 89
+target-version = "py310"
+
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "Q", "UP", "RUF", "I001"]
+
+[tool.ruff.lint.isort]
+from-first = true
