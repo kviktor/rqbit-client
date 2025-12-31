@@ -27,8 +27,8 @@ jobs:
       - name: Build
         run: uv build
       - name: Basic test (wheel)
-        run: uv run --isolated --no-project --with dist/*.whl --with=respx pytest
+        run: uv run --isolated --no-project --with dist/*.whl --with=respx --with=pytest pytest
       - name: Basic test (source distribution)
-        run: uv run --isolated --no-project --with dist/*.tar.gz --with=respx pytest
+        run: uv run --isolated --no-project --with dist/*.tar.gz --with=respx --with=pytest pytest
       - name: Publish
         run: uv publish
