@@ -17,38 +17,38 @@ from .models import (
 
 class RQBitClient:
     def __init__(self, base_url: str, auth_userpass: str | None = None):
-        self.base_url = base_url
-        self.auth_userpass = auth_userpass
+        base_url = base_url
+        auth_userpass = auth_userpass
 
         headers: dict[str, str] = {}
         env_auth_userpass = os.environ.get("RQBIT_HTTP_BASIC_AUTH_USERPASS")
-        if self.auth_userpass is None and env_auth_userpass:
-            self.auth_userpass = env_auth_userpass
+        if auth_userpass is None and env_auth_userpass:
+            auth_userpass = env_auth_userpass
 
-        if self.auth_userpass:
-            credentials = base64.b64encode(self.auth_userpass.encode()).decode()
+        if auth_userpass:
+            credentials = base64.b64encode(auth_userpass.encode()).decode()
             headers["Authorization"] = f"Basic {credentials}"
 
-        self.client = httpx.Client(base_url=self.base_url, headers=headers)
+        self._client = httpx.Client(base_url=base_url, headers=headers)
 
     def __enter__(self) -> "RQBitClient":
         return self
 
     def __exit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
-        self.client.close()
+        self._client.close()
 
     def _request(
         self,
-        method: str,
+        method: Literal["post", "get"],
         path: str,
-        data: str | bytes | None = None,
+        content: str | bytes | None = None,
         json_data: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
     ) -> httpx.Response:
-        function = getattr(self.client, method)
+        function = getattr(self._client, method)
         kwargs: dict[str, Any] = {}
-        if data:
-            kwargs["data"] = data
+        if content:
+            kwargs["content"] = content
         if json_data:
             kwargs["json"] = json_data
 
@@ -148,7 +148,7 @@ class RQBitClient:
         raise NotImplementedError("This method requires the async client.")
 
     def set_rust_log(self, new_value: str) -> dict:
-        response = self._request("post", "/rust_log", data=new_value)
+        response = self._request("post", "/rust_log", content=new_value)
         return response.json()
 
     def add_torrent(
@@ -170,9 +170,11 @@ class RQBitClient:
         if list_only is not None:
             params["list_only"] = str(list_only).lower()
 
-        response = self._request("post", "/torrents", data=torrent, params=params)
+        response = self._request("post", "/torrents", content=torrent, params=params)
+
         data = response.json()
         details = data["details"]
+
         return AddTorrent(
             id=data["id"],
             seen_peers=data["seen_peers"],
@@ -193,16 +195,16 @@ class RQBitClient:
         )
 
     def create_torrent(self, directory: str) -> dict:
-        response = self._request("post", "/torrents/create", data=directory)
+        response = self._request("post", "/torrents/create", content=directory)
         return response.json()
 
     def resolve_magnet(self, magnet: str) -> bytes:
-        response = self._request("post", "/torrents/resolve_magnet", data=magnet)
+        response = self._request("post", "/torrents/resolve_magnet", content=magnet)
         return response.content
 
     def add_peers(self, id_or_infohash: int | str, peers: str) -> dict:
         response = self._request(
-            "post", f"/torrents/{id_or_infohash}/add_peers", data=peers
+            "post", f"/torrents/{id_or_infohash}/add_peers", content=peers
         )
         return response.json()
 
